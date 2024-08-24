@@ -34,12 +34,11 @@ export function MultiSelectSearch() {
       setTags((prev) => [...prev, selectedTag]);
       setSelectedTagsSet((prev) => new Set([...prev, selectedTag]));
       setSelectedTag('');
-      setSearch('');
-      return;
+    } else {
+      setTags((prev) => [...prev, search]);
+      setSelectedTagsSet((prev) => new Set([...prev, search]));
     }
 
-    setSelectedTagsSet((prev) => new Set([...prev, search]));
-    setTags((prev) => [...prev, search]);
     setSearch('');
   }
 
