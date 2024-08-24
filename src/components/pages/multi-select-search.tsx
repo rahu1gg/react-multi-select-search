@@ -2,6 +2,7 @@ import { useDebounce } from '@/client/hooks/use-debounce.hook';
 import { X } from 'lucide-react';
 import React from 'react';
 import { useQuery } from 'react-query';
+import { Input } from '../ui/input';
 
 export function MultiSelectSearch() {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -9,8 +10,9 @@ export function MultiSelectSearch() {
   const [loading, setLoading] = React.useState(false);
   const [search, setSearch] = React.useState<string>('');
   const [selectedTag, setSelectedTag] = React.useState<string>('');
+  const [selectedTagsSet, setSelectedTagsSet] = React.useState<Set<string>>(new Set());
   const { debouncedValue: debouncedSearch } = useDebounce(search, 500);
-  const [tags, setTags] = React.useState<string[]>(['react', 'tanstack-router']);
+  const [tags, setTags] = React.useState<string[]>(['rahul', 'username']);
 
   const { isError, data } = useQuery({
     queryKey: ['search-tags', debouncedSearch],
@@ -30,18 +32,20 @@ export function MultiSelectSearch() {
 
     if (selectedTag !== '') {
       setTags((prev) => [...prev, selectedTag]);
+      setSelectedTagsSet((prev) => new Set([...prev, selectedTag]));
       setSelectedTag('');
       setSearch('');
       return;
     }
 
+    setSelectedTagsSet((prev) => new Set([...prev, search]));
     setTags((prev) => [...prev, search]);
     setSearch('');
   }
 
   return (
     <div className='max-w-2xl mx-auto space-y-4'>
-      <div className='border-2 rounded-lg py-2.5 px-4'>
+      <div>
         <div>
           {tags.map((tag, index) => {
             return (
@@ -63,9 +67,9 @@ export function MultiSelectSearch() {
           })}
         </div>
         <form className='pt-3' onSubmit={handleSubmit}>
-          <input
+          <Input
             ref={inputRef}
-            className='text-sm outline-none inline-block w-full bg-background'
+            className='border-2'
             type='text'
             autoComplete='off'
             value={selectedTag || search}
@@ -84,18 +88,21 @@ export function MultiSelectSearch() {
           />
         </form>
       </div>
-      <div className='border-2 rounded-lg py-4 px-4 text-sm max-h-96 overflow-y-auto'>
-        <div>
+      <React.Fragment>
+        <div className=''>
           {loading ? (
             <div>Loading...</div>
           ) : isError ? (
             <div>Error!</div>
           ) : data?.users.length === 0 && search !== '' ? (
             <div>No users found.</div>
-          ) : (
-            <div className='space-y-1'>
+          ) : data?.users.length === 0 ? null : (
+            <div className='space-y-1 border-2 rounded-lg py-4 px-4 text-sm max-h-96 overflow-y-auto'>
               {data?.users.map((user) => {
                 const name = `${user.firstName} ${user.lastName}`;
+
+                if (selectedTagsSet.has(name)) return null;
+
                 return (
                   <button
                     key={user.id}
@@ -113,7 +120,7 @@ export function MultiSelectSearch() {
             </div>
           )}
         </div>
-      </div>
+      </React.Fragment>
     </div>
   );
 }
