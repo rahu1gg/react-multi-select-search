@@ -9,7 +9,6 @@ export function MultiSelectSearch() {
 
   const [loading, setLoading] = React.useState(false);
   const [search, setSearch] = React.useState<string>('');
-  const [selectedTag, setSelectedTag] = React.useState<string>('');
   const [selectedTagsSet, setSelectedTagsSet] = React.useState<Set<string>>(new Set());
   const { debouncedValue: debouncedSearch } = useDebounce(search, 500);
   const [tags, setTags] = React.useState<string[]>(['rahul', 'username']);
@@ -30,15 +29,8 @@ export function MultiSelectSearch() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (selectedTag !== '') {
-      setTags((prev) => [...prev, selectedTag]);
-      setSelectedTagsSet((prev) => new Set([...prev, selectedTag]));
-      setSelectedTag('');
-    } else {
-      setTags((prev) => [...prev, search]);
-      setSelectedTagsSet((prev) => new Set([...prev, search]));
-    }
-
+    setSelectedTagsSet((prev) => new Set([...prev, search]));
+    setTags((prev) => [...prev, search]);
     setSearch('');
   }
 
@@ -71,11 +63,10 @@ export function MultiSelectSearch() {
             className='border-2'
             type='text'
             autoComplete='off'
-            value={selectedTag || search}
+            value={search}
             onChange={(e) => {
               setSearch(e.target.value);
               setLoading(true);
-              setSelectedTag('');
             }}
             onKeyDown={(e) => {
               if (e.key === 'Backspace' && search === '') {
@@ -108,7 +99,8 @@ export function MultiSelectSearch() {
                     type='button'
                     className='block bg-muted rounded-md p-2 text-muted-foreground w-full text-left'
                     onClick={() => {
-                      setSelectedTag(name);
+                      setTags((prev) => [...prev, name]);
+                      setSearch('');
                       inputRef.current?.focus();
                     }}
                   >
